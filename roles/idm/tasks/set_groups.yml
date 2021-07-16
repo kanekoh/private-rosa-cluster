@@ -1,0 +1,6 @@
+- name: Authenticate to the Kerberos realm using admin credentials
+  shell: echo '{{ idm_admin_password }}' | kinit '{{ idm_admin_user }}'
+
+- name: Create user groups
+  command: ipa group-add '{{ item.name }}' --desc='{{ item.desc }}'
+  with_items: '{{ idm_groups }}'

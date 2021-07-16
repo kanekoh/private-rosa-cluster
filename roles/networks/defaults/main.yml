@@ -1,0 +1,11 @@
+---
+# defaults file for networks
+
+aws_region: ap-northeast-1
+vpc_bastion_cidr: 10.10.0.0/20
+vpc_bastion_public_subnet_cidr: 10.10.1.0/24
+vpc_rosa_cidr: 10.20.0.0/20
+vpc_rosa_private_subnet_cidrs:
+- 10.20.10.0/24
+- 10.20.12.0/24
+- 10.20.14.0/24

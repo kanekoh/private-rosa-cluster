@@ -1,0 +1,12 @@
+---
+- hosts: localhost
+  tasks:
+  - name: Create Environment Network
+    import_role: 
+      name: networks
+
+  - name: Create bastion
+    import_role:
+      name: bastion
+
+

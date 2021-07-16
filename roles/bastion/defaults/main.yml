@@ -1,0 +1,7 @@
+---
+# defaults file for bastion
+bastion_region: ap-northeast-1
+bastion_keyname: bastion
+bastion_instance_type: m5.large	
+## AMI for RHEL-7 image
+bastion_image: ami-0155fdd0956a0c7a0

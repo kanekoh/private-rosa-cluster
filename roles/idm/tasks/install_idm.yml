@@ -1,0 +1,57 @@
+---
+# tasks file for idm
+
+- name: Install requisite packages for idm
+  yum:
+    state: latest
+    name: "{{ idm_requisite_packages }}"
+
+- name: Install rng-tools to increase entropy
+  yum:
+    state: latest
+    name: rng-tools
+
+- name: Ensure firewalld service is started and enabled
+  service:
+    name: firewalld
+    state: started
+    enabled: yes
+
+- name: Set firewall rules for directory service
+  firewalld:
+    state: enabled
+    service: "{{ item }}"
+    permanent: true
+    immediate: true
+    zone: public
+  with_items: "{{ idm_firewall_rules_directory }}"
+
+- name: Set firewall rules for http
+  firewalld:
+    state: enabled
+    service: "{{ item }}"
+    permanent: true
+    immediate: true
+    zone: public
+  with_items: "{{ idm_firewall_rules_http }}"
+
+- name: Feed random data from hardware device to kernel random device
+  command: rngd -r /dev/urandom -o /dev/random
+
+- name: Check available entropy pool size
+  command: cat /proc/sys/kernel/random/entropy_avail
+  register: entropy_avail
+
+- name: Show available entropy pool size
+  debug:
+    var: "{{ entropy_avail }}"
+
+- name: Install IdM server without Integrated DNS
+  shell: |
+    IPA_HOSTNAME=$(curl http://169.254.169.254/latest/meta-data/local-hostname)
+    IPA_DOMAIN=$(curl http://169.254.169.254/latest/meta-data/services/domain)
+    ipa-server-install --domain="$IPA_DOMAIN" --realm="$( echo $IPA_DOMAIN | tr [:lower:] [:upper:])" \
+    --admin-password="{{ idm_admin_password }}" --ds="{{ idm_admin_password }}" \
+    --hostname="${IPA_HOSTNAME}" \
+    --no-ntp \
+    --unattended

@@ -1,0 +1,12 @@
+---
+# tasks file for idm
+
+- import_tasks: enable_repository.yml
+  tags: enable_repository
+  when: idm_enable_repository == true
+
+- import_tasks: install_idm.yml
+  tags: install_idm
+
+- import_tasks: set_groups.yml
+  tags: set_groups

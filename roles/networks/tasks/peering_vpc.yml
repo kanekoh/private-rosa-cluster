@@ -1,0 +1,34 @@
+---
+- name: Create VPC Peering
+  community.aws.ec2_vpc_peer:
+    vpc_id: "{{ vpc_bastion.vpc.id }}"
+    peer_vpc_id: "{{ vpc_rosa.vpc.id }}"
+    state: present
+    tags:
+      Name: Peering connection for bastion and rosa
+  register: vpc_peer
+
+- name: Accept Peering
+  community.aws.ec2_vpc_peer:
+    peering_id: "{{ vpc_peer.peering_id }}"
+    state: accept
+  register: action_peer
+
+- name: define route table on the bastion vpc
+  with_items: "{{ vpc_rosa_private_subnet_cidrs }}"
+  community.aws.ec2_vpc_route_table:
+    vpc_id: "{{ vpc_bastion.vpc.id }}"
+    routes:
+      - dest: "{{ item }}"
+        vpc_peering_connection_id: "{{ vpc_peer.peering_id }}"
+    tags:
+      Name: "Peering Route"
+
+- name: define route table on the rosa vpc
+  community.aws.ec2_vpc_route_table:
+    vpc_id: "{{ vpc_rosa.vpc.id }}"
+    routes:
+      - dest: "{{ vpc_bastion_public_subnet_cidr }}"
+        vpc_peering_connection_id: "{{ vpc_peer.peering_id }}"
+    tags:
+      Name: "Peering Route"

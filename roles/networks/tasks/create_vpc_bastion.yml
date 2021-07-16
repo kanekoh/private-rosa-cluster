@@ -1,0 +1,37 @@
+---
+- name: Create a VPC for bastion/idp
+  amazon.aws.ec2_vpc_net:
+    name: bastion
+    cidr_block: "{{ vpc_bastion_cidr }}"
+    region: "{{ aws_region }}"
+    tags:
+      environment: bastion
+  register: vpc_bastion
+
+- name: Create public network
+  amazon.aws.ec2_vpc_subnet:
+    state: present
+    vpc_id: "{{ vpc_bastion.vpc.id }}"
+    cidr: "{{ vpc_bastion_public_subnet_cidr }}"
+    tags:
+      Name: Bastion Subnet
+      environment: bastion
+  register: bastion_subnet
+
+- name: Create Internet gateway
+  community.aws.ec2_vpc_igw:
+    vpc_id: "{{ vpc_bastion.vpc.id }}"
+    state: present
+  register: igw
+
+- name: define route table on the bastion subnet
+  community.aws.ec2_vpc_route_table:
+    vpc_id: "{{ vpc_bastion.vpc.id }}"
+    routes:
+      - dest: 0.0.0.0/0
+        gateway_id: "{{ igw.gateway_id }}"
+    subnets:
+    - "{{ bastion_subnet.subnet.id }}"
+    tags:
+      Name: "IGW Route"
+

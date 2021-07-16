@@ -1,0 +1,10 @@
+---
+# tasks file for networks
+- name: Create bastion vpc
+  import_tasks: create_vpc_bastion.yml
+
+- name: Create rosa vpc
+  import_tasks: create_vpc_rosa.yml
+
+- name: Create VPC Peering
+  import_tasks: peering_vpc.yml

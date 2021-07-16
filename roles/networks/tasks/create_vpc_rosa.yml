@@ -1,0 +1,20 @@
+---
+- name: Create a VPC for rosa
+  amazon.aws.ec2_vpc_net:
+    name: rosa
+    cidr_block: "{{ vpc_rosa_cidr }}"
+    region: "{{ aws_region }}"
+    tags:
+      environment: rosa
+  register: vpc_rosa
+
+- name: Create private network for rosa
+  with_items: "{{ vpc_rosa_private_subnet_cidrs }}"
+  amazon.aws.ec2_vpc_subnet:
+    state: present
+    vpc_id: "{{ vpc_rosa.vpc.id }}"
+    cidr: "{{ item }}"
+    tags:
+      Name: rosa private subnet 
+      environment: rosa
+  register: rosa_subnet

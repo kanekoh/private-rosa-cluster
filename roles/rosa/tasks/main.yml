@@ -1,0 +1,4 @@
+---
+# tasks file for roles/rosa
+- name: Download CLI 
+  import_tasks: download_cli.yml

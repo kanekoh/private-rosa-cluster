@@ -1,0 +1,14 @@
+---
+# defaults file for roles/rosa
+repos:
+- rhel-7-server-rhui-optional-rpms
+- rhel-server-rhui-rhscl-7-rpms
+
+packages:
+- unzip
+- "@development"
+- rh-python36
+- rh-python36-numpy
+- rh-python36-scipy
+- rh-python36-python-tools
+- rh-python36-python-six

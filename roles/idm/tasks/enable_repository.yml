@@ -1,0 +1,5 @@
+---
+# tasks file for idm
+
+- name: Enable requisite repositories for idm
+  command: subscription-manager repos --disable='*' --enable='{{ idm_requisite_repositoriy }}'

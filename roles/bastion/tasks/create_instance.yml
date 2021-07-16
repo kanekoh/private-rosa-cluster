@@ -1,0 +1,58 @@
+---
+- name: Create security groups
+  amazon.aws.ec2_group:
+    name: bastion_sg
+    description: SG for bastion node
+    state: present
+    vpc_id: "{{ vpc_bastion.vpc.id }}"
+    rules:
+      - proto: tcp
+        ports:
+        - 22
+        cidr_ip: 0.0.0.0/0
+        rule_desc: allow ssh from internet
+      - proto: icmp
+        from_port: 8
+        to_port: -1
+        cidr_ip: 0.0.0.0/0
+      - proto: tcp
+        from_port: 5900
+        to_port: 5911
+        cidr_ip: 0.0.0.0/0
+        rule_desc: allow vnc from internet
+      - proto: tcp
+        ports:
+        - 389
+        - 636
+        cidr_ip: 10.0.0.0/16
+        rule_desc: allow ldap/ldaps from internal vpc
+  register: bastion_sg
+
+- name: create bastion instance
+  amazon.aws.ec2:
+    region: "{{ bastion_region }}"
+    key_name: "{{ bastion_keyname }}"
+    instance_type: "{{ bastion_instance_type }}"
+    image: "{{ bastion_image }}"
+    wait: yes
+    group_id: "{{ bastion_sg.group_id }}"
+    exact_count: 1
+    vpc_subnet_id: "{{ bastion_subnet.subnet.id }}"
+    assign_public_ip: yes
+    count_tag:
+      Name: bastion
+    instance_tags:
+      Name: bastion
+  register: bastion
+
+- name: debug
+  debug:
+    var: bastion
+
+- name: Wait for SSH to come up
+  delegate_to: "{{ item.public_dns_name }}"
+  wait_for_connection:
+    delay: 120
+    timeout: 320
+  loop: "{{ bastion.instances }}"
+

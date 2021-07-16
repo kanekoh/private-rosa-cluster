@@ -1,0 +1,5 @@
+---
+# tasks file for bastion
+- name: Create bastion 
+  import_tasks: create_instance.yml
+  

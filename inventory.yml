@@ -1,0 +1,8 @@
+all:
+  vars:
+    timeout: 60
+    ansible_user: ec2-user
+    ansible_become: false
+    ansible_timeout: 60
+    ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+

@@ -1,0 +1,26 @@
+---
+# defaults file for idm
+
+idm_enable_repository: false
+idm_requisite_repositoriy: rhel-7-server-rpms
+idm_requisite_packages:
+  - firewalld
+  - ipa-server
+  - ipa-client
+idm_firewall_rules_directory:
+  - freeipa-ldap
+  - freeipa-ldaps
+idm_firewall_rules_http:
+  - http
+  - https
+idm_admin_password: r3dh4t1!
+idm_user_password: r3dh4t1!
+idm_admin_user: admin
+idm_groups:
+  - { name: 'openshift', desc: 'openshift accounts' }
+  - { name: 'admin', desc: 'openshift system users' }
+  - { name: 'regular', desc: 'openshift regular users' }
+idm_users:
+  - { uid: 'admin', group: 'admin', common_group: 'openshift', lastname: 'test' }
+  - { uid: 'rosaadmin', group: 'regular', common_group: 'openshift', lastname: 'test' }
+  - { uid: 'usre01', group: 'regular', common_group: 'openshift', lastname: 'test' }

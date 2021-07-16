@@ -1,0 +1,22 @@
+---
+# tasks file for idm
+
+- name: Authenticate to the Kerberos realm using admin credentials
+  shell: echo '{{ idm_admin_password }}' | kinit '{{ idm_admin_user }}'
+
+- name: Create user accounts with credentials without creating user private group
+  shell: echo '{{ idm_user_password }}' | ipa user-add '{{ item.uid }}' --first='{{ item.uid }}' --last='{{ item.lastname }}' --password
+  with_items: '{{ idm_users }}'
+
+- name: Confirm user accounts
+  command: ipa user-find '{{ item.uid }}' --first='{{ item.uid }}' --last='{{ item.lastname }}'
+  with_items: '{{ idm_users }}'
+
+- name: Associate user accounts with common group
+  command: ipa group-add-member {{ item.common_group }} --users '{{ item.uid }}'
+  with_items: '{{ idm_users }}'
+
+- name: Associate user accounts with group
+  command: ipa group-add-member {{ item.group }} --users '{{ item.uid }}'
+  with_items: '{{ idm_users }}'
+

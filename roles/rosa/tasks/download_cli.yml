@@ -1,0 +1,52 @@
+---
+- name: Enable repo
+  with_items: "{{ repos }}"
+  shell: |
+    yum-config-manager --enable {{ item }}
+
+- name: Install requirements
+  yum:
+    name: "{{ packages }}"
+    state: latest
+
+- name: Setup python3 as default
+  shell: |
+    ln -s -f /opt/rh/rh-python36/root/usr/bin/python3 /usr/local/bin/python
+    ln -s -f /opt/rh/rh-python36/root/usr/bin/pip3 /usr/local/bin/pip
+
+- name: Download rosa cli
+  shell: |
+    rm -rf rosa-linux.tar.gz 
+    curl -L "https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/rosa/latest/rosa-linux.tar.gz" -o rosa-linux.tar.gz
+    sudo tar -xzvf rosa-linux.tar.gz -C /usr/bin/
+    rosa completion > /etc/bash_completion.d/rosa
+
+- name: Download aws cli
+  shell: |
+    export PATH=/opt/rh/rh-python36/root/usr/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/home/ec2-user/.local/bin:/home/ec2-user/bin:$PATH
+    python --version
+    rm -rf awscli-bundle awscli-bundle.zip
+    curl -L "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"
+    unzip awscli-bundle.zip
+    ./awscli-bundle/install -i /usr/local/aws -b /bin/aws
+    aws --version
+
+- name: Make Dir
+  shell: |
+    mkdir -p ~/.aws
+
+- name: Setup AWS
+  become: false
+  copy:
+    src: ~/.aws/credentials
+    dest: ~/.aws/credentials
+
+- name: Verify permission
+  become: false
+  shell: |
+    aws sts get-caller-identity
+  register: aws_permission
+
+- name: Debug
+  debug:
+    var: aws_permission
